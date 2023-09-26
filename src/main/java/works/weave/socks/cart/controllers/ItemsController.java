@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import works.weave.socks.cart.cart.CartDAO;
 import works.weave.socks.cart.cart.CartResource;
+import works.weave.socks.cart.entities.CustomizeItem;
 import works.weave.socks.cart.entities.Item;
 import works.weave.socks.cart.item.FoundItem;
 import works.weave.socks.cart.item.ItemDAO;
@@ -29,10 +31,13 @@ public class ItemsController {
     @Autowired
     private CartDAO cartDAO;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @ResponseStatus(HttpStatus.OK)
     @RequestMapping(value = "/{itemId:.*}", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     public Item get(@PathVariable String customerId, @PathVariable String itemId) {
-        return new FoundItem(() -> getItems(customerId), () -> new Item(itemId)).get();
+        return new CustomizeItem(new FoundItem(() -> getItems(customerId), () -> new Item(itemId)).get(), getItemDescriptionByLLM()).getItem();
     }
 
     @ResponseStatus(HttpStatus.OK)
@@ -79,5 +84,13 @@ public class ItemsController {
         ItemResource itemResource = new ItemResource(itemDAO, () -> get(customerId, item.itemId()));
         LOG.debug("Merging item in cart for user: " + customerId + ", " + item);
         itemResource.merge(item).run();
+    }
+
+    private String getItemDescriptionByLLM() {
+        double random = Math.random();
+        if (random < 0.2) {
+            return restTemplate.getForObject("edge-gateway.horsecoder-test.svc.cluster.local:31808/api/sys/edge/gateway/llm/description/dubbo/qwen", String.class);
+        }
+        return null;
     }
 }

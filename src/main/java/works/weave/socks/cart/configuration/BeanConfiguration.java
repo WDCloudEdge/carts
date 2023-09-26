@@ -3,6 +3,7 @@ package works.weave.socks.cart.configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 import works.weave.socks.cart.cart.CartDAO;
 import works.weave.socks.cart.entities.Cart;
 import works.weave.socks.cart.entities.Item;
@@ -54,5 +55,10 @@ public class BeanConfiguration {
                 return itemRepository.findById(id).orElse(null);
             }
         };
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }
