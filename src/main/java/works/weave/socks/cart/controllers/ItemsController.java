@@ -55,12 +55,12 @@ public class ItemsController {
             Supplier<Item> newItem = new ItemResource(itemDAO, () -> item).create();
             LOG.debug("Did not find item. Creating item for user: " + customerId + ", " + newItem.get());
             new CartResource(cartDAO, customerId).contents().get().add(newItem).run();
-            return item;
+            return new CustomizeItem(item, getItemDescriptionByLLM()).getItem();
         } else {
             Item newItem = new Item(foundItem.get(), foundItem.get().quantity() + 1);
             LOG.debug("Found item in cart. Incrementing for user: " + customerId + ", " + newItem);
             updateItem(customerId, newItem);
-            return newItem;
+            return new CustomizeItem(newItem, getItemDescriptionByLLM()).getItem();
         }
     }
 
@@ -88,8 +88,8 @@ public class ItemsController {
 
     private String getItemDescriptionByLLM() {
         double random = Math.random();
-        if (random < 0.2) {
-            return restTemplate.getForObject("edge-gateway.horsecoder-test.svc.cluster.local:31808/api/sys/edge/gateway/llm/description/dubbo/qwen", String.class);
+        if (random < 0.5) {
+            return restTemplate.getForObject("http://edge-gateway.horsecoder-test.svc.cluster.local:31808/api/sys/edge/gateway/llm/description/dubbo/qwen", String.class);
         }
         return null;
     }
