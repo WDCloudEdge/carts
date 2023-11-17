@@ -89,7 +89,7 @@ public class ItemsController {
     private String getItemDescriptionByLLM() {
         double random = Math.random();
         if (random < 0.5) {
-            return restTemplate.getForObject("http://edge-gateway.horsecoder-test.svc.cluster.local:31808/api/sys/edge/gateway/llm/description/dubbo/qwen", String.class);
+            return restTemplate.getForObject("http://edge-gateway-svc.horsecoder-test.svc.cluster.local:31808/api/sys/edge/gateway/llm/description/dubbo/qwen", String.class);
         }
         return null;
     }
